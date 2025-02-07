@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; }
+        .game-board { display: grid; grid-template-columns: repeat(4, 120px); gap: 10px; margin: 20px; }
+        .card { width: 120px; height: 120px; background-color: #4a4a4a; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.6s; }
+        .card.flipped { transform: rotateY(180deg); }
+        .matched { background-color: #4caf50; }
+        #score { font-size: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Jogo da Memória</h1>
+    <div id="score">Pontos: 0</div>
+    <div class="game-board" id="gameBoard"></div>
+    <script>
+        const images = ['🍎', '🍌', '🍒', '🍇', '🍉', '🍊', '🍍', '🍓'];
+        let gameCards = [...images, ...images];
+        let score = 0;
+        let firstCard = null;
+        let secondCard = null;
+        let lockBoard = false;
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function createBoard() {
+            shuffle(gameCards);
+            const gameBoard = document.getElementById('gameBoard');
+            gameCards.forEach((image, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.image = image;
+                card.addEventListener('click', flipCard);
+                gameBoard.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            this.classList.add('flipped');
+            this.innerText = this.dataset.image;
+            if (!firstCard) {
+                firstCard = this;
+                return;
+            }
+            secondCard = this;
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            lockBoard = true;
+            const isMatch = firstCard.dataset.image === secondCard.dataset.image;
+            isMatch ? disableCards() : unflipCards();
+        }
+
+        function disableCards() {
+            firstCard.classList.add('matched');
+            secondCard.classList.add('matched');
+            score += 10;
+            document.getElementById('score').innerText = `Pontos: ${score}`;
+            resetBoard();
+        }
+
+        function unflipCards() {
+            setTimeout(() => {
+                firstCard.classList.remove('flipped');
+                firstCard.innerText = '';
+                secondCard.classList.remove('flipped');
+                secondCard.innerText = '';
+                resetBoard();
+            }, 1500);
+        }
+
+        function resetBoard() {
+            [firstCard, secondCard, lockBoard] = [null, null, false];
+            checkGameOver();
+        }
+
+        function checkGameOver() {
+            const matchedCards = document.querySelectorAll('.matched');
+            if (matchedCards.length === gameCards.length) {
+                alert(`Parabéns! Você fez ${score} pontos!`);
+                localStorage.setItem('lastScore', score);
+            }
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
