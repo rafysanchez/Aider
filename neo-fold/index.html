@@ -1,0 +1,143 @@
+Claro! Veja um exemplo de código HTML, JavaScript e uma pequena biblioteca (ffmpeg.wasm) para converter um arquivo MP4 em MP3 diretamente no navegador:
+
+1. Arquivo HTML (index.html):
+
+HTML
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Conversor MP4 para MP3</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Conversor MP4 para MP3</h1>
+    <input type="file" id="arquivoMP4" accept=".mp4">
+    <button id="converterBtn" disabled>Converter</button>
+    <div class="progress-bar">
+        <div id="progress" class="progress"></div>
+    </div>
+    <div id="status"></div>
+    <a id="downloadLink" style="display: none;">Baixar MP3</a>
+
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.9.7/dist/ffmpeg.min.js"></script>
+    <script>
+        const { createFFmpeg } = FFmpeg;
+        const ffmpeg = createFFmpeg({ log: true });
+
+        // Elementos do DOM
+        const arquivoInput = document.getElementById('arquivoMP4');
+        const converterBtn = document.getElementById('converterBtn');
+        const progressBar = document.getElementById('progress');
+        const statusDiv = document.getElementById('status');
+        const downloadLink = document.getElementById('downloadLink');
+
+        // Carrega o FFmpeg
+        (async () => {
+            try {
+                await ffmpeg.load();
+                statusDiv.textContent = 'FFmpeg está pronto!';
+                converterBtn.disabled = false;
+            } catch (error) {
+                statusDiv.textContent = 'Erro ao carregar FFmpeg: ' + error.message;
+                console.error(error);
+            }
+        })();
+
+        // Habilita o botão quando um arquivo é selecionado
+        arquivoInput.addEventListener('change', () => {
+            if (arquivoInput.files.length > 0) {
+                converterBtn.disabled = false;
+            }
+        });
+
+        // Função de conversão
+        converterBtn.addEventListener('click', async () => {
+            const file = arquivoInput.files[0];
+            if (!file) {
+                alert('Por favor, selecione um arquivo MP4');
+                return;
+            }
+
+            try {
+                // Desabilita o botão durante a conversão
+                converterBtn.disabled = true;
+                statusDiv.textContent = 'Convertendo...';
+
+                // Lê o arquivo
+                const data = await file.arrayBuffer();
+                const inputFileName = 'input.mp4';
+                const outputFileName = 'output.mp3';
+
+                // Escreve o arquivo no sistema de arquivos virtual do FFmpeg
+                ffmpeg.FS('writeFile', inputFileName, new Uint8Array(data));
+
+                // Executa a conversão
+                await ffmpeg.run(
+                    '-i', inputFileName,
+                    '-vn',
+                    '-acodec', 'libmp3lame',
+                    '-ab', '128k',
+                    '-ar', '44100',
+                    outputFileName
+                );
+
+                // Lê o arquivo convertido
+                const outputData = ffmpeg.FS('readFile', outputFileName);
+
+                // Cria o link de download
+                const blob = new Blob([outputData.buffer], { type: 'audio/mp3' });
+                const url = URL.createObjectURL(blob);
+                downloadLink.href = url;
+                downloadLink.download = file.name.replace('.mp4', '.mp3');
+                downloadLink.style.display = 'block';
+                downloadLink.textContent = 'Download MP3';
+
+                statusDiv.textContent = 'Conversão concluída!';
+            } catch (error) {
+                statusDiv.textContent = 'Erro na conversão: ' + error.message;
+                console.error(error);
+            } finally {
+                converterBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

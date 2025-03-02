@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Autenticação Completo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('login')">Login</button>
+            <button class="tab" onclick="switchTab('signup')">Cadastro</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="auth-form active" novalidate>
+            <div class="social-login">
+                <button type="button" class="google-btn" onclick="socialLogin('google')">
+                    <i class="fab fa-google"></i> Continuar com Google
+                </button>
+                <button type="button" class="facebook-btn" onclick="socialLogin('facebook')">
+                    <i class="fab fa-facebook"></i> Continuar com Facebook
+                </button>
+            </div>
+
+            <div class="separator">ou</div>
+
+            <div class="form-group">
+                <input type="email" id="loginEmail" placeholder="E-mail" required>
+                <span class="error-message" id="loginEmailError"></span>
+            </div>
+
+            <div class="form-group">
+                <div class="password-wrapper">
+                    <input type="password" id="loginPassword" placeholder="Senha" required>
+                    <button type="button" class="toggle-password">👁️</button>
+                </div>
+                <span class="error-message" id="loginPasswordError"></span>
+            </div>
+
+            <div class="form-group captcha">
+                <label>Quanto é 7 + 5? (Anti-bot)</label>
+                <input type="text" id="loginCaptcha" required>
+            </div>
+
+            <button type="submit" class="submit-btn">Entrar</button>
+            
+            <div class="additional-links">
+                <a href="#" onclick="showRecovery()">Esqueceu a senha?</a>
+                <a href="#" onclick="show2faSetup()">Configurar 2FA</a>
+            </div>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" class="auth-form" novalidate>
+            <div class="form-group">
+                <input type="text" id="fullName" placeholder="Nome completo" required>
+                <span class="error-message" id="nameError"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="email" id="signupEmail" placeholder="E-mail" required>
+                <span class="error-message" id="signupEmailError"></span>
+            </div>
+
+            <div class="form-group">
+                <div class="password-wrapper">
+                    <input type="password" id="signupPassword" placeholder="Senha" required>
+                    <button type="button" class="toggle-password">👁️</button>
+                </div>
+                <div class="password-strength">
+                    <div class="strength-bar"></div>
+                    <span id="strengthText">Força da senha</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="password-wrapper">
+                    <input type="password" id="confirmPassword" placeholder="Confirmar Senha" required>
+                    <button type="button" class="toggle-password">👁️</button>
+                </div>
+                <span class="error-message" id="confirmPasswordError"></span>
+            </div>
+
+            <div class="form-group captcha">
+                <label>Quanto é 15 - 3? (Anti-bot)</label>
+                <input type="text" id="signupCaptcha" required>
+            </div>
+
+            <div class="form-group terms">
+                <input type="checkbox" id="terms" required>
+                <label for="terms">Aceito os termos de uso e política de privacidade</label>
+            </div>
+
+            <button type="submit" class="submit-btn">Criar Conta</button>
+        </form>
+
+        <!-- Modais -->
+        <div id="recoveryModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('recovery')">&times;</span>
+                <h3>Recuperação de Senha</h3>
+                <form id="recoveryForm">
+                    <div class="form-group">
+                        <input type="email" id="recoveryEmail" placeholder="Digite seu e-mail" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Enviar Link</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="2faModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('2fa')">&times;</span>
+                <h3>Verificação em Duas Etapas</h3>
+                <p>Insira o código do seu aplicativo autenticador</p>
+                <input type="text" id="2faCode" placeholder="Código de 6 dígitos">
+                <button class="submit-btn" onclick="verify2fa()">Verificar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
